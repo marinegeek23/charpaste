@@ -1,5 +1,7 @@
 # charpaste
 
+[![CI](https://github.com/marinegeek23/charpaste/actions/workflows/ci.yml/badge.svg)](https://github.com/marinegeek23/charpaste/actions/workflows/ci.yml)
+
 A small cross-platform tray app that **types your clipboard one character at a
 time** instead of doing a `Ctrl+V` paste. That lets you "paste" into places
 where the clipboard is blocked — Azure Virtual Desktop / AVD, Citrix, locked-down
@@ -142,10 +144,37 @@ box. To start on login, drop a shortcut to `charpaste` in
 
 ---
 
-## Autostart on KDE
+## Starting, stopping, and relaunching
+
+charpaste is a normal foreground program with a tray icon — there's no
+background service for the app itself (only `ydotoold` runs as a service on
+Wayland). To **quit**, right-click the tray icon → **Quit**.
+
+To **start it again** after quitting, do any one of:
+
+- Run `charpaste` (it's on your `PATH` via `~/.local/bin`). To detach it from
+  the terminal so closing the terminal doesn't kill it:
+  ```bash
+  setsid charpaste >/dev/null 2>&1 < /dev/null &
+  ```
+- Launch **charpaste** from the KDE application launcher (if you installed the
+  app-menu entry — see below).
+- Just **log out and back in** — autostart relaunches it.
+
+Only one instance runs the tray at a time; extra `charpaste` invocations with
+`--trigger` / `--quit` talk to the already-running one over localhost.
+
+## Autostart on login (KDE)
 
 ```bash
 cp packaging/charpaste.desktop ~/.config/autostart/
+```
+
+## Show it in the KDE application launcher
+
+```bash
+cp packaging/charpaste.desktop ~/.local/share/applications/
+update-desktop-database ~/.local/share/applications 2>/dev/null || true
 ```
 
 ---

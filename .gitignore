@@ -1,0 +1,15 @@
+# Virtualenv (local install, not source)
+.venv/
+venv/
+
+# Python build/cache artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Editor/OS cruft
+.DS_Store
+*.swp

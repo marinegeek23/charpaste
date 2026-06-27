@@ -1,0 +1,17 @@
+# Optional: run ydotoold as your user so charpaste can type on Wayland.
+# Install to ~/.config/systemd/user/ydotoold.service then:
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now ydotoold
+#
+# This needs access to /dev/uinput. Create a udev rule so your user can use it
+# without root (see README, "Wayland typing setup").
+
+[Unit]
+Description=ydotool daemon (virtual input device for charpaste)
+
+[Service]
+ExecStart=/usr/bin/ydotoold --socket-path=%t/.ydotool_socket --socket-perm=0600
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

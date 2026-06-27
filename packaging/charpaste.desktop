@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=charpaste
+Comment=Type the clipboard character-by-character (paste into clipboard-disabled sessions)
+Exec=charpaste
+Icon=edit-paste
+Terminal=false
+Categories=Utility;
+X-KDE-autostart-after=panel

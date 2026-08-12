@@ -32,6 +32,33 @@ Backends are auto-detected; you can pin them in the config file.
 
 Python 3.9+.
 
+### Linux — one command (recommended)
+
+On a fresh or rebuilt machine, everything outside the repo is set up for you:
+
+```bash
+git clone https://github.com/marinegeek23/charpaste.git
+cd charpaste
+./packaging/install-linux.sh
+```
+
+That checks your system dependencies, builds the venv, puts `charpaste` on your
+`PATH`, installs the autostart and application-menu entries, enables `ydotoold`
+on Wayland, and registers the `Ctrl+Alt+V` global shortcut on KDE. It is
+idempotent — re-run it after a `git pull` to pick up code changes.
+
+Two things it deliberately does *not* do: run `sudo` (anything needing root is
+printed for you to run), and put the venv inside the repo. The venv lives at
+`~/.local/share/charpaste/venv` so the repo can sit on a network share that
+can't hold symlinks, and so moving the repo never breaks the install. Override
+with `CHARPASTE_VENV=/some/path`, and the hotkey with `CHARPASTE_HOTKEY='Meta+V'`.
+
+The venv is created with `--system-site-packages` on purpose: `pystray` needs
+your distro's PyGObject and Ayatana AppIndicator bindings to draw a tray icon,
+and a sealed venv silently gets no tray.
+
+### Manual / other platforms
+
 ```bash
 cd charpaste
 python3 -m pip install --user .
@@ -107,12 +134,27 @@ systemctl --user enable --now ydotoold
 ### 2. Trigger — pick one
 
 **A. KDE Custom Global Shortcut (recommended, no extra permissions).**
-System Settings → Shortcuts → Add → Command/URL:
-- Command: `charpaste --trigger`
-- Assign it `Ctrl+Alt+V` (or whatever you like).
+`packaging/install-linux.sh` sets this up for you. It installs the hidden
+launcher `packaging/net.local.charpaste.desktop` (KDE can only bind a shortcut
+to a `.desktop` entry, so that file exists purely to be the hotkey's target) and
+writes the binding into `kglobalshortcutsrc`:
 
-This talks to the running tray app over localhost and is the most reliable
-option on Wayland.
+```ini
+[services][net.local.charpaste.desktop]
+_launch=Ctrl+Alt+V
+```
+
+`kglobalaccel` has no D-Bus reload, so **the shortcut starts working at your
+next login.** To do it by hand instead: System Settings → Shortcuts → Add →
+Command/URL → `charpaste --trigger`.
+
+Either way, this talks to the running tray app over localhost and is the most
+reliable option on Wayland.
+
+> Give the launcher an **absolute** `Exec=` path (`~/.local/bin/charpaste
+> --trigger`). `kglobalaccel` does not necessarily inherit a `PATH` containing
+> `~/.local/bin`, so a bare `Exec=charpaste` can fail silently — the hotkey
+> appears bound and simply does nothing. The install script handles this.
 
 **B. Built-in evdev hotkey.** Add yourself to the `input` group (same
 `usermod -aG input` as above, log out/in). charpaste will then read the
@@ -166,16 +208,43 @@ Only one instance runs the tray at a time; extra `charpaste` invocations with
 
 ## Autostart on login (KDE)
 
+Done for you by `packaging/install-linux.sh`. By hand:
+
 ```bash
 cp packaging/charpaste.desktop ~/.config/autostart/
 ```
 
 ## Show it in the KDE application launcher
 
+Done for you by `packaging/install-linux.sh`. By hand:
+
 ```bash
 cp packaging/charpaste.desktop ~/.local/share/applications/
 update-desktop-database ~/.local/share/applications 2>/dev/null || true
 ```
+
+---
+
+## What lives outside the repo
+
+Everything below is machine state, not source. `packaging/install-linux.sh`
+recreates all of it, so a rebuilt machine needs nothing but a `git clone`. The
+list is here so the setup is never trapped in one box's filesystem:
+
+| Path | What it is |
+|---|---|
+| `~/.local/share/charpaste/venv` | the venv (`--system-site-packages`) |
+| `~/.local/bin/charpaste` | symlink onto `PATH` |
+| `~/.config/autostart/charpaste.desktop` | start on login |
+| `~/.local/share/applications/charpaste.desktop` | app-menu entry |
+| `~/.local/share/applications/net.local.charpaste.desktop` | hidden target for the global shortcut |
+| `~/.config/kglobalshortcutsrc` | the `Ctrl+Alt+V` binding itself |
+| `~/.config/systemd/user/ydotoold.service` | Wayland typing daemon |
+| `~/.config/charpaste/config.json` | your settings (regenerated at defaults on first run) |
+
+System packages are the only other requirement: `ydotool` + `wl-clipboard` on
+Wayland, `xclip` on X11. The install script checks for them and tells you the
+command to install them.
 
 ---
 

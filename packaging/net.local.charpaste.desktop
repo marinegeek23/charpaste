@@ -1,0 +1,12 @@
+[Desktop Entry]
+# Hidden launcher used only as the target of a KDE global shortcut.
+# KDE's global-shortcut system can only bind to a .desktop entry, so this
+# wrapper exists purely so `charpaste --trigger` can be given a hotkey.
+# Installed to ~/.local/share/applications/ by packaging/install-linux.sh,
+# which also writes the key binding into kglobalshortcutsrc.
+Exec=charpaste --trigger
+Name=charpaste
+NoDisplay=true
+StartupNotify=false
+Type=Application
+X-KDE-GlobalAccel-CommandShortcut=true

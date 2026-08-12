@@ -84,6 +84,8 @@ charpaste --config
   "hotkey": "ctrl+alt+v",   // trigger for the built-in listener
   "char_delay_ms": 8,       // raise to 20-40 if a session drops characters
   "start_delay_ms": 300,    // pause before typing so you can release the hotkey
+  "delay_enabled": false,   // the tray "Delay" checkbox
+  "delay_seconds": 3,       // how long that countdown runs
   "typing_backend": "auto", // auto | pynput | ydotool
   "clipboard_backend": "auto",
   "ipc_port": 49677
@@ -262,6 +264,53 @@ charpaste --paste-now   # type the clipboard once, no tray (handy for testing)
 charpaste --trigger     # tell the running app to type now
 charpaste --quit        # tell the running app to exit
 ```
+
+---
+
+## The tray menu
+
+```
+Type clipboard now
+Hotkey: ctrl+alt+v
+────────────────────
+[x] Delay                    ← click to switch the countdown on/off
+    Delay length: 3s  ▸      ← 1s / 2s / 3s / Custom...
+Settings...
+────────────────────
+Reload config
+Quit
+```
+
+### Countdown delay
+
+Switch **Delay** on and the app waits before it starts typing, so you have time
+to click into the target window after firing the hotkey. The tray icon counts
+the seconds down, and **triggering again while it counts cancels the paste** —
+that's the escape hatch if you fire it at the wrong window.
+
+Picking a length from **Delay length** also switches the delay on, since
+choosing "2 seconds" from a menu means you want 2 seconds. **Custom...** takes
+any value from 0 to 600 and the menu then shows it, e.g. `Custom... (7s)`.
+
+The countdown is separate from `start_delay_ms`, which is a much shorter grace
+period that always applies so your hotkey modifiers aren't still held when
+typing starts. Leave that one alone; this is the knob you want.
+
+> The checkbox and the flyout are two rows rather than one because pystray
+> never connects an activate handler to an item that has a submenu — a single
+> "Delay ▸" row could open the flyout or respond to clicks, but not both.
+
+### Settings
+
+**Settings...** opens a small form for the config values worth changing
+regularly: hotkey, countdown length, per-character delay, hotkey-release grace,
+and the typing/clipboard backends. Saving writes `config.json` and applies
+immediately — a changed hotkey restarts the listener without a relaunch.
+
+The form is Tk, run in a subprocess (the tray already owns a GTK main loop, and
+two toolkit main loops in one process do not coexist). Without Tk installed
+(`python3-tk`), **Custom...** falls back to kdialog/zenity and **Settings...**
+opens `config.json` in your editor.
 
 ---
 

@@ -19,6 +19,15 @@ DEFAULTS = {
     # characters (e.g. Ctrl still held -> Ctrl+a). 250-400 is usually plenty.
     "start_delay_ms": 300,
 
+    # Optional countdown before typing, toggled from the tray menu. This is the
+    # "give me time to click into the session first" delay, and is deliberately
+    # separate from start_delay_ms: that one is a short grace period that always
+    # applies, this one is a longer pause you switch on when you need it. While
+    # it runs the tray icon shows the seconds remaining, and triggering again
+    # cancels the paste.
+    "delay_enabled": False,
+    "delay_seconds": 3,
+
     # "auto" | "pynput" | "ydotool". auto -> ydotool on Wayland, pynput elsewhere.
     "typing_backend": "auto",
 

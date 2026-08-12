@@ -6,4 +6,4 @@ character at a time, so it works in clipboard-disabled remote sessions
 (AVD, Citrix, locked-down RDP, etc.).
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
